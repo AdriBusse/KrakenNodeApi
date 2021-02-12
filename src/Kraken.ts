@@ -3,6 +3,10 @@ import { ServerTimeObj } from './interfaces/ServerTimeObj';
 import axios from 'axios';
 import { AssetInfoObj } from './interfaces/AssetInfoObj';
 import { Currencies } from './interfaces/enums/Currencies';
+import { Pairs } from './interfaces/enums/Pairs';
+import { TradableAssetPair } from './interfaces/TradableAssetPair';
+import { buildTradableAssetPair } from './utils/buildTradableAssetPair';
+import { buildAssetPair } from './utils/buildAssetPair';
 export class Kraken {
   constructor() {}
 
@@ -31,18 +35,8 @@ export class Kraken {
       const { data } = await axios.get(
         'https://api.kraken.com/0/public/Assets'
       );
-      let curr = Object.keys(data.result);
-      let res: AssetInfoObj[] = [];
-      curr.forEach((element) => {
-        const asset: AssetInfoObj = {
-          assetClass: data.result[element].aclass,
-          altname: data.result[element].altname,
-          decimals: data.result[element].decimals,
-          display_decimals: data.result[element].display_decimals,
-        };
-        res.push(asset);
-      });
-      return res;
+
+      return buildAssetPair(data);
     } else {
       let query = '?asset=';
       assets.forEach((one) => (query = query + one + ','));
@@ -53,18 +47,24 @@ export class Kraken {
         `https://api.kraken.com/0/public/Assets${query}`
       );
 
-      let curr = Object.keys(data.result);
-      let res: AssetInfoObj[] = [];
-      curr.forEach((element) => {
-        const asset: AssetInfoObj = {
-          assetClass: data.result[element].aclass,
-          altname: data.result[element].altname,
-          decimals: data.result[element].decimals,
-          display_decimals: data.result[element].display_decimals,
-        };
-        res.push(asset);
-      });
-      return res;
+      return buildAssetPair(data);
+    }
+  }
+  async assetPairInfo(assetPairs?: Pairs[]): Promise<TradableAssetPair[]> {
+    if (assetPairs == undefined) {
+      const { data } = await axios.get(
+        'https://api.kraken.com/0/public/AssetPairs'
+      );
+      return buildTradableAssetPair(data);
+    } else {
+      let query = '?pair=';
+      assetPairs.forEach((one) => (query = query + one + ','));
+      query = query.slice(0, -1);
+
+      const { data } = await axios.get(
+        `https://api.kraken.com/0/public/AssetPairs${query}`
+      );
+      return buildTradableAssetPair(data);
     }
   }
 }

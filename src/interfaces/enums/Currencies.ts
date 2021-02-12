@@ -1,5 +1,6 @@
 export enum Currencies {
   ETH = 'ETH',
+  BTC = 'XBT',
   XBT = 'XBT',
   USDT = 'USDT',
   XRP = 'XRP',
